@@ -345,10 +345,9 @@ echo ═════════════════════════
 echo.
 echo    Check for new updates (both stable and beta) at the app's GitHub page.
 echo.
-cmdmenusel %bg_color%%hl_color% "   Go to GitHub page" "   Perform an update" " < Back"
+cmdmenusel %bg_color%%hl_color% "   Go to GitHub page" " < Back"
 if %errorlevel% == 1 start %updateLink%
-if %errorlevel% == 2 call update.bat
-if %errorlevel% == 3 goto scene_others
+if %errorlevel% == 2 goto scene_others
 goto scene_others_checkUpdates
 
 :scene_others_advanced
@@ -1456,4 +1455,5 @@ goto scene_select_opponent
 :endoffile
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: Do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
+
 :: And just for the fun of it, here's the 1459th line of this app's source code
