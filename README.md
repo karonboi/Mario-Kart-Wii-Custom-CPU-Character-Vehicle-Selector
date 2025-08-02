@@ -17,7 +17,7 @@ The code requires the user to *subject which character and vehicle each CPU play
 Simply specify which character and vehicle you want for a CPU opponent. If you want to set one config for all CPU opponents, go to *Other options - Set all CPUs selection*. Then click *Generate Gecko code* and you're done.
 ### Does it have any known issues?
 Once the code is applied, **all the characters** - including the one that the players have selected - **will be locked**. Unless the game is closed or force reset, they cannot be changed whatsoever. It can get a little bit annoying, but if you can put up with it, then that's good.
-### Does it compatible with other regions?
+### Is it compatible with other regions?
 You can change the Gecko code's region in *Other options*.
 ### Can Mii racers be added in here?
 Yes, this program supports including the Mii racers. Detailed instructions will be included in the program.
