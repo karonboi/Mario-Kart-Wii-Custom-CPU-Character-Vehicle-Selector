@@ -1455,5 +1455,5 @@ goto scene_select_opponent
 :endoffile
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: Do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
+:: And just for the fun of it, here's the 1458th line of this app's source code
 
-:: And just for the fun of it, here's the 1459th line of this app's source code
