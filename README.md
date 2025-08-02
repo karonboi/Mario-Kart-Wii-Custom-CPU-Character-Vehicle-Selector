@@ -21,3 +21,6 @@ Once the code is applied, all the characters - including the one that the player
 You can change the Gecko code's region in 'Other options'.
 ### Can Mii racers be added in here?
 Yes, this program supports including the Mii racers. Detailed instructions will be included in the program.
+
+## How do I build the program?
+You don't need to build the program, just download the source code and run *_app.bat_* and it will work just fine. However, if you want to keep your PC's desktop clean or just don't like starting a program from a folder, download the compiled executable from the releases page instead.
