@@ -26,6 +26,6 @@ Yes, this program supports including the Mii racers. Detailed instructions are i
 You don't need to build the program, just download the source code and run *app.bat* and it will work just fine. However, if you want to keep your PC's desktop clean or just don't like starting a program from a folder, use *Windows IExpress* to package the source materials into a self-extract executable, then set ***cmd /c app.bat*** as the install command.
 
 ## External resources
-- bg.exe - used as an alternative to the *cls* command to prevent flickering when switching screens
-- cmdmenusel.exe - used for interactive buttons on the terminal window
-- cmdwiz.exe - its only purpose here is to count how many letter are there in a value
+- ***bg.exe*** - used as an alternative to the *cls* command to prevent flickering when switching screens
+- ***cmdmenusel.exe*** - used for interactive buttons on the terminal window
+- ***cmdwiz.exe*** - its only purpose here is to count how many letters are there in a value
