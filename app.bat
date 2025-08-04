@@ -16,8 +16,8 @@ chcp 65001 > nul
 :: Now I'm a university's freshman with a lot of other stuffs to do, but I will occasinally return here to continue the app's development
 
 :: Preparing common variables and create directories
-set "fileVer=4.0.2.14"
-set "relsVer=1.0.0.0"
+set "fileVer=4.0.2.15"
+set "relsVer=1.0.0.1"
 set "updateLink="
 set slot_num=0
 set opponent=0
@@ -1456,5 +1456,6 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: Do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
 :: And just for the fun of it, here's the 1458th line of this app's source code
+
 
 
