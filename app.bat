@@ -187,7 +187,7 @@ if %darkmode% == 0 set "darkmode_name=Disabled"
 if %darkmode% == 1 set "darkmode_name=Enabled"
 if "%code%" == "wait_input" set "code_name=Ask when generating code"
 if not "%code%" == "wait_input" set "code_name=%code%"
-@mode con lines=20 cols=92
+@mode con lines=21 cols=92
 cls
 call :system_saveSelectDatatoTMP
 echo.
@@ -1456,4 +1456,5 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: Do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
 :: And just for the fun of it, here's the 1458th line of this app's source code
+
 
