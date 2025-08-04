@@ -23,4 +23,4 @@ You can change the Gecko code's region in *Other options*.
 Yes, this program supports including the Mii racers. Detailed instructions will be included in the program.
 
 ## How do I build the program?
-You don't need to build the program, just download the source code and run *app.bat* and it will work just fine. However, if you want to keep your PC's desktop clean or just don't like starting a program from a folder, download the compiled executable from the releases page instead.
+You don't need to build the program, just download the source code and run *app.bat* and it will work just fine. However, if you want to keep your PC's desktop clean or just don't like starting a program from a folder, use Windows IExpress to package the source materials into a self-extract executable, then set ***cmd /c app.bat*** as the install command.
