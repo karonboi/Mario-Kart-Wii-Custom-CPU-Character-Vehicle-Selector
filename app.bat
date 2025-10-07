@@ -11,14 +11,15 @@ chcp 65001 > nul
 :: It is also relying on life supports- uh, I mean the external packages to reach this level of "advancement" for a DOS program, to the point of making it fit for r/programminghorror
 :: Some anti-virus software will definitely pick this as a threat, and there's nothing I can do to stop such false alarms. You and I are gonna deal with this for the rest of our lives
 
-:: A little (and unrelated) trivia about this program: to this revision, three different laptops had carried its source code, with the first being Dell Latitude 3340, sencond is Lenovo ThinkPad T420i, and currently HP EliteBook 8560w. The two previous ones are still alive and in my room, with the Dell having Linux installed
+:: A little (and unrelated) trivia about this program: to this revision, three different laptops had carried its source code, with the first being Dell Latitude 3340, sencond is Lenovo ThinkPad T420i, third is HP EliteBook 8560w, and now Dell Precision 7720. The two early ones are still alive and in my room, with the Latutide having Linux installed
 :: I started developing this app since late March 2023 after I've done fantasizing a Mario Kart race full of Dry Bones, and it had remained close-source for the past two years, until now
 :: Now I'm a university's freshman with a lot of other stuffs to do, but I will occasinally return here to continue the app's development
 
 :: Preparing common variables and create directories
-set "fileVer=4.0.2.15"
-set "relsVer=1.0.0.1"
-set "updateLink="
+:system_preparingParameters
+set "fileVer=4.0.2.16"
+set "relsVer=1.0.0.2"
+set "updateLink=https://github.com/karonboi/Mario-Kart-Wii-Custom-CPU-Character-Vehicle-Selector/releases"
 set slot_num=0
 set opponent=0
 set code_wasWaitingforInput=0
@@ -127,6 +128,7 @@ goto system_createSlots
 ) > "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt"
 goto endoffile
 
+:: This section may be retired soon
 :scene_system_win11Note
 @mode con lines=24 cols=92
 cls
@@ -403,10 +405,11 @@ echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 echo    Enable the app to cache the list of slots' names the first time Data management menu
-echo    is opened? This will disable full cache updating, thus reducing loading times.
+echo    is opened?
 echo.
 echo    The cache will not be updated until the app closes, only minor changes made by saving
-echo    or erasing slots will update a small portion of that.
+echo    or erasing slots will update a small portion of that. This will disable full cache
+echo    updating, thus reducing loading times.
 echo.
 echo    If you are disabling this, enter and exit Data management menu for the change to take    
 echo    effect.
@@ -612,6 +615,8 @@ goto scene_others
 for /l %%a in (1, 1, 100) do del "C:\karonboi\KaronWizard\saved_selections\%%a.slt" > nul
 goto endoffile
 
+:: Have you seen Mega Greninja's design in the Mega Dimension DLC for Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to
+:: Still couldn't believe we got a DLC for a game that wasn't even out yet
 :system_checkDataValidity
 bg locate 1 3
 echo Validating data... This could take a while.
@@ -1454,8 +1459,6 @@ goto scene_select_opponent
 
 :endoffile
 :: This empty code block lets sub-processes to exit without closing the whole app
-:: Do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
-:: And just for the fun of it, here's the 1458th line of this app's source code
-
-
-
+:: This area can be populated with cleanup commands produced by sub-processes if neccesary
+:: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
+:: And just for the fun of it, here's the 1464th line of this app's source code
