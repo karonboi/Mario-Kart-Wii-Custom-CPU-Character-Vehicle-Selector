@@ -2,6 +2,7 @@
 @mode con lines=19 cols=92
 set overwrite=0
 set isDataCopied=0
+set "lock_message="
 
 :scene_slotSelect_1
 set slot_page=1
@@ -11,8 +12,8 @@ echo    Select a slot to save the selections: [1/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " -- -------- ----" " <  Back"
-if %errorlevel% == 12 goto scene_slotSelect_1
+cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " >> To last page" " <  Back"
+if %errorlevel% == 12 goto scene_slotSelect_10
 if %errorlevel% == 11 goto scene_slotSelect_2
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set slot_num=%errorlevel%
@@ -146,17 +147,20 @@ echo    Select a slot to save the selections: [10/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " --  ---- ----" " <- Previous page" " <  Back"
-if %errorlevel% == 11 goto scene_slotSelect_10
+cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " << To first page" " <- Previous page" " <  Back"
+if %errorlevel% == 11 goto scene_slotSelect_1
 if %errorlevel% == 12 goto scene_slotSelect_9
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set /a slot_num=%errorlevel%+90
 goto scene_nameSlot
  
 :system_readSlot
-if %slot_num% == %slottoLoad% goto scene_cannotSaveonLoadSlot
+if %slot_num% == %slottoLoad% goto scene_cannotSaveonLoadSlot_inUse
 copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
 call C:\karonboi\KaronWizard\tmp\save_slt.bat
+if %slot_lock% == 1 (
+	if %lock_state% == 1 goto scene_cannotSaveonLoadSlot_locked
+)
 del C:\karonboi\KaronWizard\tmp\save_slt.bat > nul
 set slot_name_old=%slot_name%
 if %subfunction% == 1 (
@@ -181,10 +185,20 @@ if %errorlevel% == 1 set overwrite=1 && goto system_saveSlot
 if %errorlevel% == 2 goto scene_slotSelect_%slot_page%
 goto scene_slotSelect_%slot_page%
 
-:scene_cannotSaveonLoadSlot
+:scene_cannotSaveonLoadSlot_inUse
 cls
 echo.
 echo    Cannot save on slot %slot_num% as it is being used to load data to workspace later on.
+echo.
+echo ════════════════════════════════════════════════════════════════════════════════════════════
+echo.
+cmdmenusel %bg_color%%hl_color% "   OK"
+goto scene_slotSelect_%slot_page%
+
+:scene_cannotSaveonLoadSlot_locked
+cls
+echo.
+echo    Cannot save on slot %slot_num% because it was locked.
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
@@ -222,11 +236,14 @@ pause > nul
 goto scene_nameSlot
 
 :system_saveSlot
+if %askLockonSave% == 1 call :scene_system_askLock
+if %askLockonSave% == 0 set lock_state_new=0
 if %subfunction% == 1 goto system_saveSlot_copy
 call C:\karonboi\KaronWizard\tmp\select_data.bat
 (
 	echo @echo off
 	echo set "slot_name=%slot_name_new%"
+	echo set "lock_state=%lock_state_new%"
 	echo set "char1=%char1%"
 	echo set "char2=%char2%"
 	echo set "char3=%char3%"
@@ -281,6 +298,7 @@ set slot_num_to_receiveCopy=%slot_num%
 (
 	echo @echo off
 	echo set "slot_name=%slot_name_new%"
+	echo set "lock_state=%lock_state_new%"
 	echo set "char1=%char1%"
 	echo set "char2=%char2%"
 	echo set "char3=%char3%"
@@ -328,10 +346,19 @@ set slot_num_to_receiveCopy=%slot_num%
 ) > "C:\karonboi\KaronWizard\saved_selections"\%slot_num_to_receiveCopy%.slt"
 goto scene_saveSlot_done
 
+:scene_system_askLock
+echo.
+echo    Do you want to lock this slot from being edited as well?
+echo.
+cmdmenusel %bg_color%%hl_color% "   Yes" "   No"
+if %errorlevel% == 1 set lock_state_new=1 && set "lock_message= and locked"
+if %errorlevel% == 2 set lock_state_new=0 && set "lock_message="
+goto endoffile
+
 :scene_saveSlot_done
 cls
 echo.
-echo    Slot %slot_num% is saved as:
+echo    Slot %slot_num% is saved%lock_message% as:
 echo    "%slot_name_new%".
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
