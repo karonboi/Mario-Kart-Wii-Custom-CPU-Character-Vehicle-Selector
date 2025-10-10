@@ -1,5 +1,6 @@
 @echo off
 @mode con lines=19 cols=92
+set lock_state=0
 
 :scene_slotSelect_1
 set slot_page=1
@@ -9,8 +10,8 @@ echo    Select a slot to erase the selections: [1/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " -- -------- ----" " <  Back"
-if %errorlevel% == 12 goto scene_slotSelect_1
+cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " >> To last page" " <  Back"
+if %errorlevel% == 12 goto scene_slotSelect_10
 if %errorlevel% == 11 goto scene_slotSelect_2
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set slot_num=%errorlevel%
@@ -144,8 +145,8 @@ echo    Select a slot to erase the selections: [10/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " --  ---- ----" " <- Previous page" " <  Back"
-if %errorlevel% == 11 goto scene_slotSelect_10
+cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " << To first page" " <- Previous page" " <  Back"
+if %errorlevel% == 11 goto scene_slotSelect_1
 if %errorlevel% == 12 goto scene_slotSelect_9
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set /a slot_num=%errorlevel%+90
@@ -154,11 +155,25 @@ goto system_check_data
 :system_check_data
 copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
 call C:\karonboi\KaronWizard\tmp\save_slt.bat
+if "%slot_name%" == "(none)" goto scene_cannotEraseSlot_dataNotExist
+if "%lock_state%" == "" set lock_state=0
+if %slot_lock% == 1 (
+	if %lock_state% == 1 goto scene_cannotEraseSlot_locked
+)
 del C:\karonboi\KaronWizard\tmp\save_slt.bat > nul
-if "%slot_name%" == "(none)" goto scene_dataNotExist
 goto scene_ask_eraseSlot
 
-:scene_dataNotExist
+:scene_cannotEraseSlot_locked
+cls
+echo.
+echo    Cannot erase slot %slot_num% because it was locked.
+echo.
+echo ════════════════════════════════════════════════════════════════════════════════════════════
+echo.
+cmdmenusel %bg_color%%hl_color% "   OK"
+goto scene_slotSelect_%slot_page%
+
+:scene_cannotEraseSlot_dataNotExist
 cls
 echo.
 echo    There is nothing to erase at slot %slot_num%.
