@@ -1,5 +1,6 @@
 @echo off
 @mode con lines=20 cols=92
+set lock_state=0
 
 :scene_slotSelect_1
 set slot_page=1
@@ -9,9 +10,9 @@ echo    Select a slot to view the selections: [1/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " - -------- ----" " <  Back"
+cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " >> To last page " " <  Back"
 if %errorlevel% == 11 goto scene_slotSelect_2
-if %errorlevel% == 12 goto scene_slotSelect_1
+if %errorlevel% == 12 goto scene_slotSelect_10
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set slot_num=%errorlevel%
 goto scene_viewSlot
@@ -144,8 +145,8 @@ echo    Select a slot to view the selections: [10/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " - ---- ----" " <- Previous page" " <  Back"
-if %errorlevel% == 11 goto scene_slotSelect_10
+cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " << To first page" " <- Previous page" " <  Back"
+if %errorlevel% == 11 goto scene_slotSelect_1
 if %errorlevel% == 12 goto scene_slotSelect_9
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set /a slot_num=%errorlevel%+90
@@ -153,16 +154,21 @@ goto scene_viewSlot
 
 :scene_viewSlot
 cls
+set "lock_state_name="
 copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
 call C:\karonboi\KaronWizard\tmp\save_slt.bat
 if "%slot_name%" == "(none)" goto scene_viewSlot_empty
+if %slot_lock% == 1 (
+	if %lock_state% == 0 set "lock_state_name=" && set "lock_state_actName=Lock"
+	if %lock_state% == 1 set "lock_state_name=, locked" && set "lock_state_actName=Unlock"
+)
 echo.
 echo    Slot %slot_num%'s contents:
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 del C:\karonboi\KaronWizard\tmp\save_slt.bat > nul
-echo    "%slot_name%"
+echo    "%slot_name%"%lock_state_name%
 echo    CPU 1 [%char1_name%, %veh1_name%]
 echo    CPU 2 [%char2_name%, %veh2_name%]
 echo    CPU 3 [%char3_name%, %veh3_name%]
@@ -175,8 +181,15 @@ echo    CPU 9 [%char9_name%, %veh9_name%]
 echo    CPU 10 [%char10_name%, %veh10_name%]
 echo    CPU 11 [%char11_name%, %veh11_name%]
 echo.
-cmdmenusel %bg_color%%hl_color% " < Back"
+if %lockToggle% == 1 goto scene_system_subMenu_lockToggle
+if %lockToggle% == 0 cmdmenusel %bg_color%%hl_color% " < Back"
 goto scene_slotSelect_%slot_page%
+
+:scene_system_subMenu_lockToggle
+cmdmenusel %bg_color%%hl_color% "   %lock_state_actName% slot" " < Back"
+if %errorlevel% == 1 call :system_lockSlot
+if %errorlevel% == 2 goto scene_slotSelect_%slot_page%
+goto scene_viewSlot
 
 :scene_viewSlot_empty
 echo.
@@ -186,6 +199,60 @@ echo ═════════════════════════
 echo.
 cmdmenusel %bg_color%%hl_color% " < Back"
 goto scene_slotSelect_%slot_page%
+
+:system_lockSlot
+if %lock_state% == 0 set lock_state_new=1
+if %lock_state% == 1 set lock_state_new=0
+(
+	echo @echo off
+	echo set "slot_name=%slot_name%"
+	echo set "lock_state=%lock_state_new%"
+	echo set "char1=%char1%"
+	echo set "char2=%char2%"
+	echo set "char3=%char3%"
+	echo set "char4=%char4%"
+	echo set "char5=%char5%"
+	echo set "char6=%char6%"
+	echo set "char7=%char7%"
+	echo set "char8=%char8%"
+	echo set "char9=%char9%"
+	echo set "char10=%char10%"
+	echo set "char11=%char11%"
+	echo set "char1_name=%char1_name%"
+	echo set "char2_name=%char2_name%"
+	echo set "char3_name=%char3_name%"
+	echo set "char4_name=%char4_name%"
+	echo set "char5_name=%char5_name%"
+	echo set "char6_name=%char6_name%"
+	echo set "char7_name=%char7_name%"
+	echo set "char8_name=%char8_name%"
+	echo set "char9_name=%char9_name%"
+	echo set "char10_name=%char10_name%"
+	echo set "char11_name=%char11_name%"
+	echo set "veh1=%veh1%"
+	echo set "veh2=%veh2%"
+	echo set "veh3=%veh3%"
+	echo set "veh4=%veh4%"
+	echo set "veh5=%veh5%"
+	echo set "veh6=%veh6%"
+	echo set "veh7=%veh7%"
+	echo set "veh8=%veh8%"
+	echo set "veh9=%veh9%"
+	echo set "veh10=%veh10%"
+	echo set "veh11=%veh11%"
+	echo set "veh1_name=%veh1_name%"
+	echo set "veh2_name=%veh2_name%"
+	echo set "veh3_name=%veh3_name%"
+	echo set "veh4_name=%veh4_name%"
+	echo set "veh5_name=%veh5_name%"
+	echo set "veh6_name=%veh6_name%"
+	echo set "veh7_name=%veh7_name%"
+	echo set "veh8_name=%veh8_name%"
+	echo set "veh9_name=%veh9_name%"
+	echo set "veh10_name=%veh10_name%"
+	echo set "veh11_name=%veh11_name%"
+) > "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt"
+goto endoffile
 
 :endoffile
 call C:\karonboi\KaronWizard\tmp\select_data.bat
