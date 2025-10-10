@@ -9,8 +9,8 @@ echo    Select a slot to load the selections: [1/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " -- -------- ----" " <  Back"
-if %errorlevel% == 12 goto scene_slotSelect_1
+cmdmenusel %bg_color%%hl_color% "    Slot 1 [%slot1_name%]" "    Slot 2 [%slot2_name%]" "    Slot 3 [%slot3_name%]" "    Slot 4 [%slot4_name%]" "    Slot 5 [%slot5_name%]" "    Slot 6 [%slot6_name%]" "    Slot 7 [%slot7_name%]" "    Slot 8 [%slot8_name%]" "    Slot 9 [%slot9_name%]" "    Slot 10 [%slot10_name%]" " -> Next page" " >> To last page" " <  Back"
+if %errorlevel% == 12 goto scene_slotSelect_10
 if %errorlevel% == 11 goto scene_slotSelect_2
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set slot_num=%errorlevel%
@@ -144,8 +144,8 @@ echo    Select a slot to load the selections: [10/10]
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " --  ---- ----" " <- Previous page" " <  Back"
-if %errorlevel% == 11 goto scene_slotSelect_10
+cmdmenusel %bg_color%%hl_color% "    Slot 91 [%slot91_name%]" "    Slot 92 [%slot92_name%]" "    Slot 93 [%slot93_name%]" "    Slot 94 [%slot94_name%]" "    Slot 95 [%slot95_name%]" "    Slot 96 [%slot96_name%]" "    Slot 97 [%slot97_name%]" "    Slot 98 [%slot98_name%]" "    Slot 99 [%slot99_name%]" "    Slot 100 [%slot100_name%]" " << To first page" " <- Previous page" " <  Back"
+if %errorlevel% == 11 goto scene_slotSelect_1
 if %errorlevel% == 12 goto scene_slotSelect_9
 if %errorlevel% == 13 call C:\karonboi\KaronWizard\tmp\select_data.bat & goto endoffile
 set /a slot_num=%errorlevel%+90
