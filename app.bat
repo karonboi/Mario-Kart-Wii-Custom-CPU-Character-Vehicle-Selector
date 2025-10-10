@@ -7,18 +7,18 @@ setlocal EnableDelayedExpansion > nul
 chcp 65001 > nul
 
 :: Every part of this source code is written manually, plus they are connected by kindergarten paper glue and who-knows-how-long-it-has-existed duct tape, so don't expect it to run properly
-:: I will fix up any bugs that appear though (which may appear frequently)
+:: I will still fix up any bugs that (may frequently) appear
 :: It is also relying on life supports- uh, I mean the external packages to reach this level of "advancement" for a DOS program, to the point of making it fit for r/programminghorror
 :: Some anti-virus software will definitely pick this as a threat, and there's nothing I can do to stop such false alarms. You and I are gonna deal with this for the rest of our lives
 
 :: A little (and unrelated) trivia about this program: to this revision, three different laptops had carried its source code, with the first being Dell Latitude 3340, sencond is Lenovo ThinkPad T420i, third is HP EliteBook 8560w, and now Dell Precision 7720. The two early ones are still alive and in my room, with the Latutide having Linux installed
-:: I started developing this app since late March 2023 after I've done fantasizing a Mario Kart race full of Dry Bones, and it had remained close-source for the past two years, until now
+:: I started developing this app since late March 2023 after I've done fantasizing a Mario Kart race full of Dry Bones, and it had remained close-source for the past two years, until the August of 2025 when I finally decided to publish this horror to GitHub
 :: Now I'm a university's freshman with a lot of other stuffs to do, but I will occasinally return here to continue the app's development
 
 :: Preparing common variables and create directories
 :system_preparingParameters
-set "fileVer=4.0.2.16"
-set "relsVer=1.0.0.2"
+set "fileVer=4.0.3.0"
+set "relsVer=1.0.1.0"
 set "updateLink=https://github.com/karonboi/Mario-Kart-Wii-Custom-CPU-Character-Vehicle-Selector/releases"
 set slot_num=0
 set opponent=0
@@ -29,6 +29,9 @@ set adva_datManCache_intervent=0
 set "win11_note="
 set "darkmode="
 set "remem_selectData="
+set "slot_lock="
+set "lockToggle="
+set "askLockonSave="
 set "adva_endoffileExit="
 set "adva_datManCache="
 if not exist C:\karonboi\KaronWizard\tmp mkdir C:\karonboi\KaronWizard\tmp > nul
@@ -41,6 +44,9 @@ if "%darkmode%" == "" set darkmode=1 && call :system_saveOptionsData
 if "%adva_endoffileExit%" == "" set adva_endoffileExit=0 && call :system_saveOptionsData
 if "%adva_datManCache%" == "" set adva_datManCache=0 && call :system_saveOptionsData
 if "%remem_selectData%" == "" set remem_selectData=1 && call :system_saveOptionsData
+if "%slot_lock%" == "" set slot_lock=0 && call :system_saveOptionsData
+if "%lockToggle%" == "" set lockToggle=0 && call :system_saveOptionsData
+if "%askLockonSave%" == "" set askLockonSave=0 && call :system_saveOptionsData
 if %darkmode% == 1 set "bg_color=07" && set "hl_color=70"
 if %darkmode% == 0 set "bg_color=70" && set "hl_color=07"
 color %bg_color%
@@ -81,6 +87,7 @@ goto system_createSlots
 (
 	echo @echo off
 	echo set "slot_name=(none)"
+	echo set "lock_state=0"
 	echo set "char1=0"
 	echo set "char2=0"
 	echo set "char3=0"
@@ -219,6 +226,7 @@ goto scene_others
 
 :: Temporarily saves selections data from the workspace
 :: Since the %charX% and %vehX% variables (as well as %charX_name% and %vehX_name% variants) are shared across processes, their values can change constantly, resulting in ungodly inconsistencies without a recalling system
+:: If %remem_selectData% is 1, this file will not be deleted upon startup
 :system_saveSelectDatatoTMP
 (
 	echo @echo off
@@ -276,6 +284,9 @@ echo set remem_selectData=1 >> C:\karonboi\KaronWizard\options.bat
 echo set win11_note=1 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=0 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=0 >> C:\karonboi\KaronWizard\options.bat
+echo set slot_lock=0 >> C:\karonboi\KaronWizard\options.bat
+echo set lockToggle=0 >> C:\karonboi\KaronWizard\options.bat
+echo set askLockonSave=0 >> C:\karonboi\KaronWizard\options.bat
 echo set darkmode=1 >> C:\karonboi\KaronWizard\options.bat
 goto endoffile
 
@@ -288,8 +299,11 @@ echo set remem_selectData=%remem_selectData% >> C:\karonboi\KaronWizard\options.
 echo set win11_note=%win11_note% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=%adva_endoffileExit% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=%adva_datManCache% >> C:\karonboi\KaronWizard\options.bat
+echo set slot_lock=%slot_lock% >> C:\karonboi\KaronWizard\options.bat
+echo set lockToggle=%lockToggle% >> C:\karonboi\KaronWizard\options.bat
+echo set askLockonSave=%askLockonSave% >> C:\karonboi\KaronWizard\options.bat
 echo set darkmode=%darkmode% >> C:\karonboi\KaronWizard\options.bat
-echo    Settings saved.
+echo    Settings saved.⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 goto endoffile
 
 :: I have the memory capacity of a goldfish
@@ -460,6 +474,12 @@ set i=0
 if %adva_datManCache% == 0 set adva_datManCache_intervent=0
 if %isDataRead% == 0 set free_slot=0 && call :system_readFiles
 if %adva_datManCache% == 1 set adva_datManCache_intervent=1
+if %slot_lock% == 0 (
+	set "slot_lock_name=Disabled completely"
+) else if %slot_lock% == 1 (
+	if %lockToggle% == 1 set "slot_lock_name=In-menu toggle"
+	if %askLockonSave% == 1 set "slot_lock_name=In-menu toggle and ask lock on save"
+)
 cls
 title Mario Kart Wii: Custom CPU Character/Vehicle Selector
 echo.
@@ -468,10 +488,11 @@ echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 echo    Free space: %free_slot% out of 100
+if %adva_datManCache% == 1 echo    [Data management caching is enabled]
 echo.
-echo %data_1%%data_2%%data_3%%data_4%%data_5%%data_6%%data_7%%data_8%%data_9%%data_10%%data_11%%data_12%%data_13%%data_14%%data_15%%data_16%%data_17%%data_18%%data_19%%data_20%%data_21%%data_22%%data_23%%data_24%%data_25%%data_26%%data_27%%data_28%%data_29%%data_30%%data_31%%data_32%%data_33%%data_34%%data_35%%data_36%%data_37%%data_38%%data_39%%data_40%%data_41%%data_42%%data_43%%data_44%%data_45%%data_46%%data_47%%data_48%%data_49%%data_50%%data_51%%data_52%%data_53%%data_54%%data_55%%data_56%%data_57%%data_58%%data_59%%data_60%%data_61%%data_62%%data_63%%data_64%%data_65%%data_66%%data_67%%data_68%%data_69%%data_70%%data_71%%data_72%%data_73%%data_74%%data_75%%data_76%%data_77%%data_78%%data_79%%data_80%%data_81%%data_82%%data_83%%data_84%%data_85%%data_8%%data_87%%data_88%%data_89%%data_90%%data_91%%data_92%%data_93%%data_94%%data_95%%data_96%%data_97%%data_98%%data_99%%data_100%
+echo %data_1%%data_2%%data_3%%data_4%%data_5%%data_6%%data_7%%data_8%%data_9%%data_10%%data_11%%data_12%%data_13%%data_14%%data_15%%data_16%%data_17%%data_18%%data_19%%data_20%%data_21%%data_22%%data_23%%data_24%%data_25%%data_26%%data_27%%data_28%%data_29%%data_30%%data_31%%data_32%%data_33%%data_34%%data_35%%data_36%%data_37%%data_38%%data_39%%data_40%%data_41%%data_42%%data_43%%data_44%%data_45%%data_46%%data_47%%data_48%%data_49%%data_50%%data_51%%data_52%%data_53%%data_54%%data_55%%data_56%%data_57%%data_58%%data_59%%data_60%%data_61%%data_62%%data_63%%data_64%%data_65%%data_66%%data_67%%data_68%%data_69%%data_70%%data_71%%data_72%%data_73%%data_74%%data_75%%data_76%%data_77%%data_78%%data_79%%data_80%%data_81%%data_82%%data_83%%data_84%%data_85%%data_86%%data_87%%data_88%%data_89%%data_90%%data_91%%data_92%%data_93%%data_94%%data_95%%data_96%%data_97%%data_98%%data_99%%data_100%
 echo.
-cmdmenusel %bg_color%%hl_color% "   View selections' data" "   Save current selections" "   Load selections to workspace" "   Erase selections" "   View exported codes" "   Remember workspace's selection data [%remem_selectData_name%]" "   Delete options and selection data from this computer" " < Back"
+cmdmenusel %bg_color%%hl_color% "   View selections' data" "   Save current selections" "   Load selections to workspace" "   Erase selections" "   View exported codes" "   Remember workspace's selection data [%remem_selectData_name%]" "   Slot locking options [%slot_lock_name%]" "   Delete options and selection data from this computer" " < Back"
 cls
 if %errorlevel% == 1 goto scene_viewSelections
 if %errorlevel% == 2 goto scene_saveSelections
@@ -479,8 +500,9 @@ if %errorlevel% == 3 goto scene_loadSelections
 if %errorlevel% == 4 goto scene_deleteSelections
 if %errorlevel% == 5 start C:\karonboi\KaronWizard\exported_selections
 if %errorlevel% == 6 goto scene_others_rememSaveData
-if %errorlevel% == 7 goto scene_deleteReferences
-if %errorlevel% == 8 (
+if %errorlevel% == 7 goto scene_others_slotLockOptions
+if %errorlevel% == 8 goto scene_deleteReferences
+if %errorlevel% == 9 (
 	if %adva_datManCache% == 1 goto scene_others
 	if %adva_datManCache% == 0 set isDataRead=0 && goto scene_others
 ) else set isDataRead=0 && goto scene_others
@@ -520,6 +542,106 @@ goto scene_selectionsManagement
 call select_view.bat
 goto scene_selectionsManagement
 
+:scene_others_slotLockOptions
+bg locate 0 0
+set "optn1= "
+set "optn2= "
+set "optn3= "
+if %slot_lock% == 0 set "optn1=*"
+if %slot_lock% == 1 (
+	if %lockToggle% == 1 set "optn2=*"
+	if %askLockonSave% == 1 set "optn3=*"
+)
+if %askLockonSave% == 1 (
+	if %lockToggle% == 0 (
+		set askLockonSave=0
+		set slot_lock=0
+		set "optn1= "
+		set "optn3= "
+		call :system_saveOptionsData
+	)
+)
+echo.
+echo    Other options - Data management - Slot locking options
+echo.
+echo ════════════════════════════════════════════════════════════════════════════════════════════════════
+echo.
+echo    This is a mistake-proof feature that prevents selected slots from being altered on accident.
+:: The reason this feature was added was because the developer commited a brain fart and destroyed his own ideal racer set
+echo    Choose how this feature should behave in the app.
+echo.
+cmdmenusel %bg_color%%hl_color% " %optn1% Disable completely" " %optn2% Lock/unlock toggle in 'View selections data' menu" " %optn3% Ask to lock in each save" " < Back"
+:: The logic nightmare begins
+if %errorlevel% == 1 call :system_subProc_others_slotLockOptions_disableAll
+if %errorlevel% == 2 (
+	if %lockToggle% == 0 (
+		set slot_lock=1
+		set lockToggle=1
+		call :system_saveOptionsData
+	) else if %lockToggle% == 1 (
+		if %askLockonSave% == 1 call :scene_system_others_slotLockOptions_askDisable
+		if %askLockonSave% == 0 (
+			if %lockToggle% == 0 set lockToggle=1 && set slot_lock=1
+			if %lockToggle% == 1 set lockToggle=0 && set slot_lock=0
+			call :system_saveOptionsData
+		)
+	)
+) else if %errorlevel% == 3 (
+	if %lockToggle% == 0 call :scene_system_others_slotLockOptions_askEnable
+	if %lockToggle% == 1 (
+		if %askLockonSave% == 0 set askLockonSave=1
+		if %askLockonSave% == 1 set askLockonSave=0
+		call :system_saveOptionsData
+	)
+) else if %errorlevel% == 4 goto scene_selectionsManagement
+goto scene_others_slotLockOptions
+
+:scene_system_others_slotLockOptions_askDisable
+echo.
+echo    To disable this, asking to lock on each save must be disabled as well.
+echo    Do you want to continue?
+echo.
+cmdmenusel %bg_color%%hl_color% "   Yes" "   No"
+if %errorlevel% == 1 call :system_subProc_others_slotLockOptions_disableAll
+if %errorlevel% == 2 call :system_cleanSubMenu_others_slotLockOptions && goto scene_others_slotLockOptions
+goto endoffile
+
+:scene_system_others_slotLockOptions_askEnable
+echo.
+echo    To enable this, the lock/unlock toggle must be enabled as well.
+echo    Do you want to continue?
+echo.
+cmdmenusel %bg_color%%hl_color% "   Yes" "   No"
+if %errorlevel% == 1 call :system_subProc_others_slotLockOptions_enableAll
+if %errorlevel% == 2 call :system_cleanSubMenu_others_slotLockOptions && goto scene_others_slotLockOptions
+goto endoffile
+
+:system_subProc_others_slotLockOptions_disableAll
+set slot_lock=0
+set lockToggle=0
+set askLockonSave=0
+call :system_cleanSubMenu_others_slotLockOptions
+call :system_saveOptionsData
+goto endoffile
+
+:system_subProc_others_slotLockOptions_enableAll
+set slot_lock=1
+set lockToggle=1
+set askLockonSave=1
+call :system_cleanSubMenu_others_slotLockOptions
+call :system_saveOptionsData
+goto endoffile
+
+:system_cleanSubMenu_others_slotLockOptions
+bg locate 13 0
+echo ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+echo ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+echo.
+echo ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+echo ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+bg locate 12 0
+goto endoffile
+		
 :scene_randomize
 :: Hey there, did you bring in the dice?
 call randomizer.bat
@@ -539,10 +661,10 @@ goto scene_others
 call scene_instruct.bat
 goto scene_others
 
-:: I main Donkey Kong, Link and Kirby in Smash Ultimate (mostly DK 'cuz spiking good)
-:: At random times, I may play as Cloud, Sephiroth, Marth, or Min Min (last one's a lie don't believe him)
+:: I main Donkey Kong, Link and Kirby in Smash Ultimate (mostly DK cuz spiking good)
+:: At random times, I may play as Cloud, Sephiroth, or Min Min (last one's a lie don't believe him)
 :: I also main Greninja but only occasinally due to the lack of combo-openers besides dash attack, which is really hard to pull out, and being a lightweight character, heavyweights don't even need to break a sweat to slap that poor amphibian to death
-:: Also unrelated, but I have a male Greninja named "Ballison" in Pokemon X. Sounds like he could live in Tarrey Village by the way
+:: Also unrelated, but I have a male Greninja named "Ballison" in Pokemon X, as well as a female one WITH THE SAME NAME in Y. Sounds like they could live a happy life in Tarrey Village by the way
 :scene_code_region
 bg locate 0 0
 set "optn1= "
@@ -615,7 +737,7 @@ goto scene_others
 for /l %%a in (1, 1, 100) do del "C:\karonboi\KaronWizard\saved_selections\%%a.slt" > nul
 goto endoffile
 
-:: Have you seen Mega Greninja's design in the Mega Dimension DLC for Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to
+:: Have you seen Mega Greninja's design from Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to
 :: Still couldn't believe we got a DLC for a game that wasn't even out yet
 :system_checkDataValidity
 bg locate 1 3
@@ -1461,4 +1583,4 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: This area can be populated with cleanup commands produced by sub-processes if neccesary
 :: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
-:: And just for the fun of it, here's the 1464th line of this app's source code
+:: And just for the fun of it, here's the 1586th line of this app's source code
