@@ -2,6 +2,7 @@
 @mode con lines=19 cols=92
 set overwrite=0
 set isDataCopied=0
+set lock_state=0
 set "lock_message="
 
 :scene_slotSelect_1
@@ -289,6 +290,17 @@ call C:\karonboi\KaronWizard\tmp\select_data.bat
 	echo set "veh10_name=%veh10_name%"
 	echo set "veh11_name=%veh11_name%"
 ) > "C:\karonboi\KaronWizard\saved_selections"\%slot_num%.slt"
+copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
+call C:\karonboi\KaronWizard\tmp\save_slt.bat
+set slot%slot_num%_name=%slot_name%
+del C:\karonboi\KaronWizard\tmp\save_slt.bat
+set /a free_slot=%free_slot%-1
+set "data_%slot_num%=█"
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 call :system_updatePersistentCache
+)
+set overwrite=0
+set isDataCopied=1
 goto scene_saveSlot_done
 
 :system_saveSlot_copy
@@ -344,6 +356,17 @@ set slot_num_to_receiveCopy=%slot_num%
 	echo set "veh10_name=%veh10_name%"
 	echo set "veh11_name=%veh11_name%"
 ) > "C:\karonboi\KaronWizard\saved_selections"\%slot_num_to_receiveCopy%.slt"
+copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
+call C:\karonboi\KaronWizard\tmp\save_slt.bat
+set slot%slot_num%_name=%slot_name%
+del C:\karonboi\KaronWizard\tmp\save_slt.bat
+set /a free_slot=%free_slot%-1
+set "data_%slot_num%=█"
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 call :system_updatePersistentCache
+)
+set overwrite=0
+set isDataCopied=1
 goto scene_saveSlot_done
 
 :scene_system_askLock
@@ -355,6 +378,12 @@ if %errorlevel% == 1 set lock_state_new=1 && set "lock_message= and locked"
 if %errorlevel% == 2 set lock_state_new=0 && set "lock_message="
 goto endoffile
 
+:system_updatePersistentCache
+del C:\karonboi\KaronWizard\cache.bat
+call createPersistentCache.bat
+call C:\karonboi\KaronWizard\cache.bat
+goto endoffile
+
 :scene_saveSlot_done
 cls
 echo.
@@ -364,14 +393,6 @@ echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 cmdmenusel %bg_color%%hl_color% "   OK"
-copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
-call C:\karonboi\KaronWizard\tmp\save_slt.bat
-set slot%slot_num%_name=%slot_name%
-del C:\karonboi\KaronWizard\tmp\save_slt.bat
-set /a free_slot=%free_slot%-1
-set "data_%slot_num%=█"
-set overwrite=0
-set isDataCopied=1
 goto scene_slotSelect_%slot_page%
 
 :endoffile
