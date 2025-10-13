@@ -193,11 +193,11 @@ echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 cmdmenusel %bg_color%%hl_color% "   Erase" "   Cancel"
-if %errorlevel% == 1 goto scene_eraseSlot
+if %errorlevel% == 1 goto scene_system_eraseSlot
 if %errorlevel% == 2 goto scene_slotSelect_%slot_page%
 goto scene_ask_eraseSlot
 
-:scene_eraseSlot
+:scene_system_eraseSlot
 (
 	echo @echo off
 	echo set "slot_name=(none)"
@@ -246,13 +246,6 @@ goto scene_ask_eraseSlot
 	echo set "veh10_name=(none)"
 	echo set "veh11_name=(none)"
 ) > "C:\karonboi\KaronWizard\saved_selections"\%slot_num%.slt"
-cls
-echo.
-echo    Slot %slot_num% is erased.
-echo.
-echo ════════════════════════════════════════════════════════════════════════════════════════════
-echo.
-cmdmenusel %bg_color%%hl_color% "   OK"
 copy "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
 call C:\karonboi\KaronWizard\tmp\save_slt.bat
 set slot%slot_num%_name=%slot_name%
@@ -260,6 +253,25 @@ del C:\karonboi\KaronWizard\tmp\save_slt.bat
 call C:\karonboi\KaronWizard\tmp\select_data.bat
 set /a free_slot=%free_slot%+1
 set "data_%slot_num%=░"
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 call :system_updatePersistentCache
+)
+goto scene_eraseSlot_done
+
+:system_updatePersistentCache
+del C:\karonboi\KaronWizard\cache.bat
+call createPersistentCache.bat
+call C:\karonboi\KaronWizard\cache.bat
+goto endoffile
+
+:scene_eraseSlot_done
+cls
+echo.
+echo    Slot %slot_num% is erased.
+echo.
+echo ════════════════════════════════════════════════════════════════════════════════════════════
+echo.
+cmdmenusel %bg_color%%hl_color% "   OK"
 goto scene_slotSelect_%slot_page%
 
 
