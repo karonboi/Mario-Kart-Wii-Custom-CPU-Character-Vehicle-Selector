@@ -17,9 +17,10 @@ chcp 65001 > nul
 
 :: Preparing common variables and create directories
 :system_preparingParameters
-set "fileVer=4.0.3.0"
-set "relsVer=1.0.1.0"
+set "fileVer=4.0.3.1"
+set "relsVer=1.0.1.1"
 set "updateLink=https://github.com/karonboi/Mario-Kart-Wii-Custom-CPU-Character-Vehicle-Selector/releases"
+set i=0
 set slot_num=0
 set opponent=0
 set code_wasWaitingforInput=0
@@ -34,6 +35,7 @@ set "lockToggle="
 set "askLockonSave="
 set "adva_endoffileExit="
 set "adva_datManCache="
+set "adva_datManCachePersist="
 if not exist C:\karonboi\KaronWizard\tmp mkdir C:\karonboi\KaronWizard\tmp > nul
 if not exist "C:\karonboi\KaronWizard\exported_selections" mkdir "C:\karonboi\KaronWizard\exported_selections" > nul 
 if not exist "C:\karonboi\KaronWizard\saved_selections" mkdir "C:\karonboi\KaronWizard\saved_selections" > nul
@@ -43,15 +45,30 @@ if "%win11_note%" == "" set win11_note=1 && call :system_saveOptionsData
 if "%darkmode%" == "" set darkmode=1 && call :system_saveOptionsData
 if "%adva_endoffileExit%" == "" set adva_endoffileExit=0 && call :system_saveOptionsData
 if "%adva_datManCache%" == "" set adva_datManCache=0 && call :system_saveOptionsData
+if "%adva_datManCachePersist%" == "" set adva_datManCachePersist=0 && call :system_saveOptionsData
 if "%remem_selectData%" == "" set remem_selectData=1 && call :system_saveOptionsData
 if "%slot_lock%" == "" set slot_lock=0 && call :system_saveOptionsData
 if "%lockToggle%" == "" set lockToggle=0 && call :system_saveOptionsData
 if "%askLockonSave%" == "" set askLockonSave=0 && call :system_saveOptionsData
 if %darkmode% == 1 set "bg_color=07" && set "hl_color=70"
 if %darkmode% == 0 set "bg_color=70" && set "hl_color=07"
+for /l %%a in (1, 1, 100) do set "data_%%a=░"
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 (
+		if not exist C:\karonboi\KaronWizard\cache.bat (
+			call :system_readFiles
+			call createPersistentCache.bat
+			set "cache_lastUpdated=%date% %time%"
+			set isDataRead=1
+		)
+	) else if %adva_datManCachePersist% == 0 (
+		if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
+	)
+) else if %adva_datManCache% == 0 (
+	if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
+)
 color %bg_color%
 call :system_createSlots
-for /l %%a in (1, 1, 100) do set "data_%%a=░"
 
 :: Create characters and vehicle's name placeholders. It also acts as a reset function, which I forgot to add in for 3 revisions of this source code
 :system_createCharPlaceholders
@@ -165,6 +182,7 @@ goto scene_select_opponent
 :: Main menu, obviously.
 :: Sometimes you will see this menu being mentioned as a "workspace"
 :scene_select_opponent
+title Mario Kart Wii: Custom CPU Character/Vehicle Selector
 @mode con lines=20 cols=92
 if exist C:\karonboi\KaronWizard\tmp\clip.txt del C:\karonboi\KaronWizard\tmp\clip.txt > nul
 if %remem_selectData% == 1 call C:\karonboi\KaronWizard\tmp\select_data.bat > nul
@@ -201,6 +219,7 @@ cls
 call :system_saveSelectDatatoTMP
 echo.
 :: See the symbol below the file/release version string? Can you guess what it is?
+:: (spoilers alert, you will hear me mention about that figure multiple times as you progress)
 echo                                                                File version: %fileVer%
 echo    Other options                                               Release ver.: %relsVer%
 echo                                                                ◥Ө┴Ө◤
@@ -284,6 +303,7 @@ echo set remem_selectData=1 >> C:\karonboi\KaronWizard\options.bat
 echo set win11_note=1 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=0 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=0 >> C:\karonboi\KaronWizard\options.bat
+echo set adva_datManCachePersist=0 >> C:\karonboi\KaronWizard\options.bat
 echo set slot_lock=0 >> C:\karonboi\KaronWizard\options.bat
 echo set lockToggle=0 >> C:\karonboi\KaronWizard\options.bat
 echo set askLockonSave=0 >> C:\karonboi\KaronWizard\options.bat
@@ -299,6 +319,7 @@ echo set remem_selectData=%remem_selectData% >> C:\karonboi\KaronWizard\options.
 echo set win11_note=%win11_note% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=%adva_endoffileExit% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=%adva_datManCache% >> C:\karonboi\KaronWizard\options.bat
+echo set adva_datManCachePersist=%adva_datManCachePersist% >> C:\karonboi\KaronWizard\options.bat
 echo set slot_lock=%slot_lock% >> C:\karonboi\KaronWizard\options.bat
 echo set lockToggle=%lockToggle% >> C:\karonboi\KaronWizard\options.bat
 echo set askLockonSave=%askLockonSave% >> C:\karonboi\KaronWizard\options.bat
@@ -370,7 +391,11 @@ goto scene_others_checkUpdates
 if %adva_endoffileExit% == 0 set "adva_endoffileExit_name=Disabled"
 if %adva_endoffileExit% == 1 set "adva_endoffileExit_name=Enabled"
 if %adva_datManCache% == 0 set "adva_datManCache_name=Disabled"
-if %adva_datManCache% == 1 set "adva_datManCache_name=Enabled"
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 set "adva_datManCache_name=Enabled, with persistent caching"
+	if %adva_datManCachePersist% == 0 set "adva_datManCache_name=Enabled"
+)
+@mode con lines=21 cols=92
 cls
 echo.
 echo    Other options - Advanced settings
@@ -382,7 +407,7 @@ echo.
 cmdmenusel %bg_color%%hl_color% "   Use 'endoffile' to close app [%adva_endoffileExit_name%]" "   Data management caching [%adva_datManCache_name%]" " < Back"
 cls
 if %errorlevel% == 1 goto scene_others_advanced_endoffileExit
-if %errorlevel% == 2 goto scene_others_advanced_datManCache
+if %errorlevel% == 2 @mode con lines=30 cols=92 && goto scene_others_advanced_datManCache
 if %errorlevel% == 3 goto scene_others
 goto scene_others_advanced
 
@@ -411,8 +436,10 @@ goto scene_others_advanced_endoffileExit
 bg locate 0 0
 set "optn1= "
 set "optn2= "
+set "optn3= "
 if %adva_datManCache% == 1 set "optn1=*"
 if %adva_datManCache% == 0 set "optn2=*"
+if %adva_datManCachePersist% == 1 set "optn3=*"
 echo.
 echo    Other options - Advanced settings - Data management caching
 echo.
@@ -425,13 +452,23 @@ echo    The cache will not be updated until the app closes, only minor changes m
 echo    or erasing slots will update a small portion of that. This will disable full cache
 echo    updating, thus reducing loading times.
 echo.
+echo    Persistent caching keeps the cache data of the previous session available even after
+echo    the app has closed. This will further improve loading times in the 'Data management'
+echo    menu, but it will also increase the risk of data desync if the cached content no
+echo    longer matches with the original one. Has no effect if the core feature is disabled
+echo    and requires the app to be restarted to take effect.
+echo.
 echo    If you are disabling this, enter and exit Data management menu for the change to take    
 echo    effect.
 echo.
-cmdmenusel %bg_color%%hl_color% " %optn1% Enable" " %optn2% Disable" " < Back"
+cmdmenusel %bg_color%%hl_color% " %optn1% Enable" " %optn3% Persistent caching" " %optn2% Disable" " < Back"
 if %errorlevel% == 1 set adva_datManCache=1
-if %errorlevel% == 2 set adva_datManCache=0
-if %errorlevel% == 3 goto scene_others_advanced
+if %errorlevel% == 2 (
+	if %adva_datManCachePersist% == 1 set adva_datManCachePersist=0
+	if %adva_datManCachePersist% == 0 set adva_datManCachePersist=1
+)
+if %errorlevel% == 3 set adva_datManCache=0
+if %errorlevel% == 4 goto scene_others_advanced
 call :system_saveOptionsData
 goto scene_others_advanced_datManCache
 
@@ -480,6 +517,9 @@ if %slot_lock% == 0 (
 	if %lockToggle% == 1 set "slot_lock_name=In-menu toggle"
 	if %askLockonSave% == 1 set "slot_lock_name=In-menu toggle and ask lock on save"
 )
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 call C:\karonboi\KaronWizard\cache.bat
+)
 cls
 title Mario Kart Wii: Custom CPU Character/Vehicle Selector
 echo.
@@ -488,7 +528,10 @@ echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════════════
 echo.
 echo    Free space: %free_slot% out of 100
-if %adva_datManCache% == 1 echo    [Data management caching is enabled]
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 echo    [Last persistent cache update: %cache_lastUpdated%]
+	if %adva_datManCachePersist% == 0 echo    [Data management caching is enabled]
+)
 echo.
 echo %data_1%%data_2%%data_3%%data_4%%data_5%%data_6%%data_7%%data_8%%data_9%%data_10%%data_11%%data_12%%data_13%%data_14%%data_15%%data_16%%data_17%%data_18%%data_19%%data_20%%data_21%%data_22%%data_23%%data_24%%data_25%%data_26%%data_27%%data_28%%data_29%%data_30%%data_31%%data_32%%data_33%%data_34%%data_35%%data_36%%data_37%%data_38%%data_39%%data_40%%data_41%%data_42%%data_43%%data_44%%data_45%%data_46%%data_47%%data_48%%data_49%%data_50%%data_51%%data_52%%data_53%%data_54%%data_55%%data_56%%data_57%%data_58%%data_59%%data_60%%data_61%%data_62%%data_63%%data_64%%data_65%%data_66%%data_67%%data_68%%data_69%%data_70%%data_71%%data_72%%data_73%%data_74%%data_75%%data_76%%data_77%%data_78%%data_79%%data_80%%data_81%%data_82%%data_83%%data_84%%data_85%%data_86%%data_87%%data_88%%data_89%%data_90%%data_91%%data_92%%data_93%%data_94%%data_95%%data_96%%data_97%%data_98%%data_99%%data_100%
 echo.
@@ -511,9 +554,15 @@ goto scene_selectionsManagement
 :: Reads the selection slots' data
 :: Originally, this code block was in the three separate slot management menus, which means the slot data is read every time the menu switches from one to another, introducing unneccessary delays
 :: The %isDataRead% variable prevents the app from refreshing the slots' data if the user is still in the Data management menu and only do so to a single slot that is recently edited by the user
-:: If %adva_datManCache% is enabled, this code block will be only used once since the app's startup
+:: If %adva_datManCache% is 1, this code block will be only used once since the app's startup
+:: And if %adva_datManCachePersist% is 1, this code block's core functions will be skipped entirely
 :system_readFiles
 if %adva_datManCache_intervent% == 1 goto endoffile
+if %adva_datManCache% == 1 (
+	if %adva_datManCachePersist% == 1 (
+		if exist C:\karonboi\KaronWizard\cache.bat call C:\karonboi\KaronWizard\cache.bat && goto endoffile
+	)
+)	
 if %i% gtr 99 set isDataRead=1 && goto endoffile
 set /a i=%i%+1
 copy "C:\karonboi\KaronWizard\saved_selections\%i%.slt" "C:\karonboi\KaronWizard\tmp\save_slt.bat" > nul
@@ -547,6 +596,7 @@ bg locate 0 0
 set "optn1= "
 set "optn2= "
 set "optn3= "
+:: I exist just to suffer
 if %slot_lock% == 0 set "optn1=*"
 if %slot_lock% == 1 (
 	if %lockToggle% == 1 set "optn2=*"
@@ -664,7 +714,8 @@ goto scene_others
 :: I main Donkey Kong, Link and Kirby in Smash Ultimate (mostly DK cuz spiking good)
 :: At random times, I may play as Cloud, Sephiroth, or Min Min (last one's a lie don't believe him)
 :: I also main Greninja but only occasinally due to the lack of combo-openers besides dash attack, which is really hard to pull out, and being a lightweight character, heavyweights don't even need to break a sweat to slap that poor amphibian to death
-:: Also unrelated, but I have a male Greninja named "Ballison" in Pokemon X, as well as a female one WITH THE SAME NAME in Y. Sounds like they could live a happy life in Tarrey Village by the way
+:: Also unrelated, but I have a male Greninja named "Ballison" in Pokemon X, as well as a female one WITH THE SAME NAME but because that didn't sound right so I later made a new file and renamed her "Konuichi" in Y. However, I still kept the "Ballison" naming as her canonical first name (in my head at least)
+:: Off-topic, but it sounds like they could live a happy life together in Tarrey Village by the way
 :scene_code_region
 bg locate 0 0
 set "optn1= "
@@ -739,6 +790,9 @@ goto endoffile
 
 :: Have you seen Mega Greninja's design from Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to
 :: Still couldn't believe we got a DLC for a game that wasn't even out yet
+
+:: Checks for any invalidity of the character-vehicle size-relative rule
+:: For example, a lightweight character must be paired with small vehicles and vice versa
 :system_checkDataValidity
 bg locate 1 3
 echo Validating data... This could take a while.
@@ -1583,4 +1637,4 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: This area can be populated with cleanup commands produced by sub-processes if neccesary
 :: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
-:: And just for the fun of it, here's the 1586th line of this app's source code
+:: And just for the fun of it, here's the 1640th line of this app's source code
