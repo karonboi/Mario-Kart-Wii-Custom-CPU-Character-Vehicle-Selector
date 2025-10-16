@@ -17,8 +17,9 @@ chcp 65001 > nul
 
 :: Preparing common variables and create directories
 :system_preparingParameters
-set "fileVer=4.0.3.1"
-set "relsVer=1.0.1.1"
+:: fileVer, relsVer and updateLink were intended for use with an auto-update feature using winget, but was later scrapped because... nah
+set "fileVer=4.0.3.2"
+set "relsVer=1.0.1.2"
 set "updateLink=https://github.com/karonboi/Mario-Kart-Wii-Custom-CPU-Character-Vehicle-Selector/releases"
 set i=0
 set slot_num=0
@@ -464,10 +465,22 @@ echo.
 cmdmenusel %bg_color%%hl_color% " %optn1% Enable" " %optn3% Persistent caching" " %optn2% Disable" " < Back"
 if %errorlevel% == 1 set adva_datManCache=1
 if %errorlevel% == 2 (
-	if %adva_datManCachePersist% == 1 set adva_datManCachePersist=0
-	if %adva_datManCachePersist% == 0 set adva_datManCachePersist=1
+	if %adva_datManCachePersist% == 1 (
+		set adva_datManCachePersist=0
+		if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
+	) else if %adva_datManCachePersist% == 0 (
+		set adva_datManCachePersist=1
+		if not exist C:\karonboi\KaronWizard\cache.bat (
+			call :system_readFiles
+			call createPersistentCache.bat
+			title Mario Kart Wii: Custom CPU Character/Vehicle Selector
+		)
+	)
 )
-if %errorlevel% == 3 set adva_datManCache=0
+if %errorlevel% == 3 (
+	set adva_datManCache=0
+	if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
+)
 if %errorlevel% == 4 goto scene_others_advanced
 call :system_saveOptionsData
 goto scene_others_advanced_datManCache
@@ -1637,4 +1650,4 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: This area can be populated with cleanup commands produced by sub-processes if neccesary
 :: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
-:: And just for the fun of it, here's the 1640th line of this app's source code
+:: And just for the fun of it, here's the 1653th line of this app's source code
