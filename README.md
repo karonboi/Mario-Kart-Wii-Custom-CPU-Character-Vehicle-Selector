@@ -4,7 +4,7 @@ I wasted too much time building this thing.
 * * *
 
 ## What is this?
-In case the repo's name is not obvious enough, this program allows you to *customize which character and vehicle the CPU players use* in single-player or local multiplayer Mario Kart Wii races. This also affects Grand Prix races, as well as VS races and Battles.
+In case the repo's name is not obvious enough, this program allows you to *customize which character and vehicle the CPU players use* in Mario Kart Wii races. However, this code can only be used exclusively in single-player game modes.
 
 If you're looking for a way to let every player in Mario Kart Wii to play as Funky Kong, *you have found the right place*.
 
