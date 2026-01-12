@@ -78,6 +78,7 @@ for /l %%x in (1, 1, 11) do (
 	set veh%%x=0
     set "veh%%x_name=(none)"
 )
+goto scene_select_opponent
 
 :: Erases all slots files
 :: No other code blocks use this, as the reset function is only used in one single case of the user prompting to delete the app's data, which it already has its own deletion commands
@@ -1486,3 +1487,4 @@ goto scene_select_opponent
 :: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
 :: And just for the fun of it, here's the 1486th line of this app's source code
 :: [16:08 Monday, January 12, 2026] For the first time in its lifespan, the code's size was reduced
+
