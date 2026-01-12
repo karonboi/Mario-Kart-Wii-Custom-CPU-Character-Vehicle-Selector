@@ -18,8 +18,8 @@ chcp 65001 > nul
 :: Preparing common variables and create directories
 :system_preparingParameters
 :: fileVer, relsVer and updateLink were intended for use with an auto-update feature using winget, but was later scrapped because... nah
-set "fileVer=4.0.3.2"
-set "relsVer=1.0.1.2"
+set "fileVer=4.1.0.0"
+set "relsVer=1.1.0.0"
 set "updateLink=https://github.com/karonboi/Mario-Kart-Wii-Custom-CPU-Character-Vehicle-Selector/releases"
 set i=0
 set slot_num=0
@@ -28,7 +28,7 @@ set code_wasWaitingforInput=0
 set isDataRead=0
 set subfunction=0
 set adva_datManCache_intervent=0
-set "win11_note="
+set mii_selected=0
 set "darkmode="
 set "remem_selectData="
 set "slot_lock="
@@ -42,7 +42,6 @@ if not exist "C:\karonboi\KaronWizard\exported_selections" mkdir "C:\karonboi\Ka
 if not exist "C:\karonboi\KaronWizard\saved_selections" mkdir "C:\karonboi\KaronWizard\saved_selections" > nul
 if not exist "C:\karonboi\KaronWizard\options.bat" call :system_createOptionsData > nul
 call C:\karonboi\KaronWizard\options.bat
-if "%win11_note%" == "" set win11_note=1 && call :system_saveOptionsData
 if "%darkmode%" == "" set darkmode=1 && call :system_saveOptionsData
 if "%adva_endoffileExit%" == "" set adva_endoffileExit=0 && call :system_saveOptionsData
 if "%adva_datManCache%" == "" set adva_datManCache=0 && call :system_saveOptionsData
@@ -62,10 +61,10 @@ if %adva_datManCache% == 1 (
 			set "cache_lastUpdated=%date% %time%"
 			set isDataRead=1
 		)
-	) else if %adva_datManCachePersist% == 0 (
+	) else (
 		if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
 	)
-) else if %adva_datManCache% == 0 (
+) else (
 	if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
 )
 color %bg_color%
@@ -79,13 +78,10 @@ for /l %%x in (1, 1, 11) do (
 	set veh%%x=0
     set "veh%%x_name=(none)"
 )
-if %win11_note% == 1 goto scene_system_win11Note
-if %win11_note% == 0 goto scene_select_opponent
-goto scene_select_opponent
 
 :: Erases all slots files
 :: No other code blocks use this, as the reset function is only used in one single case of the user prompting to delete the app's data, which it already has its own deletion commands
-:: This thing will stay here as a relic of my mistakes during the making of this app
+:: This thing will stay here as a relic of my mishaps during the making of this app
 :system_resetSlots
 for /l %%a in (1, 1, 100) do (
 	set slot_num=%%a
@@ -153,7 +149,8 @@ goto system_createSlots
 ) > "C:\karonboi\KaronWizard\saved_selections\%slot_num%.slt"
 goto endoffile
 
-:: This section may be retired soon
+:: This section has been retired
+:: The %win11_note% flag and scene_others_win11Note_ref has also been decomissioned as well
 :scene_system_win11Note
 @mode con lines=24 cols=92
 cls
@@ -177,7 +174,6 @@ echo.
 echo    You can disable this message later in Other options.
 echo.
 cmdmenusel %bg_color%%hl_color% "   Can I disable it now?" "   OK"
-if %errorlevel% == 1 set win11_note=0 && call :system_saveOptionsData
 goto scene_select_opponent
 
 :: Main menu, obviously.
@@ -186,10 +182,16 @@ goto scene_select_opponent
 title Mario Kart Wii: Custom CPU Character/Vehicle Selector
 @mode con lines=20 cols=92
 if exist C:\karonboi\KaronWizard\tmp\clip.txt del C:\karonboi\KaronWizard\tmp\clip.txt > nul
-if %remem_selectData% == 1 call C:\karonboi\KaronWizard\tmp\select_data.bat > nul
-if %remem_selectData% == 0 del C:\karonboi\KaronWizard\tmp\select_data.bat > nul
-if "%code%" == "wait_input" set "code_name=Ask when generating code"
-if not "%code%" == "wait_input" set "code_name=%code%"
+if %remem_selectData% == 1 (
+	call C:\karonboi\KaronWizard\tmp\select_data.bat > nul
+) else (
+	del C:\karonboi\KaronWizard\tmp\select_data.bat > nul
+)
+if "%code%" == "wait_input" (
+	set "code_name=Ask when generating code"
+) else (
+	set "code_name=%code%"
+)
 cls
 echo.
 echo    Select a CPU opponent:
@@ -200,8 +202,11 @@ cmdmenusel %bg_color%%hl_color% "       CPU 1 [%char1_name%, %veh1_name%]" "    
 if %errorlevel% == 12 goto scene_others
 if %errorlevel% == 13 goto system_checkDataValidity
 if %errorlevel% == 14 (
-	if %adva_endoffileExit% == 1 goto endoffile
-	if %adva_endoffileExit% == 0 exit
+	if %adva_endoffileExit% == 1 (
+		goto endoffile
+	) else (
+		exit
+	)
 )
 set opponent=%errorlevel%
 goto scene_select_character
@@ -209,8 +214,6 @@ goto scene_select_character
 :: There's always more than one option in your life
 :scene_others
 :: This starting part converts in-app variables to eligible texts to properly represents the options' status
-if %win11_note% == 0 set "win11_note_name=Disabled"
-if %win11_note% == 1 set "win11_note_name=Enabled"
 if %darkmode% == 0 set "darkmode_name=Disabled"
 if %darkmode% == 1 set "darkmode_name=Enabled"
 if "%code%" == "wait_input" set "code_name=Ask when generating code"
@@ -227,7 +230,7 @@ echo                                                                ◥Ө┴Ө�
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-cmdmenusel %bg_color%%hl_color% "   Code region [%code_name%]" "   Reset workspace" "   Set all CPUs' selections in workspace" "   Randomize CPUs' selections" "   Data management" "   View exported codes" "   Windows 11 message [%win11_note_name%]" "   Dark mode [%darkmode_name%]" "   Advanced settings" "   Check for updates" "   What is this thing?" "   How do I use it?" " < Back"
+cmdmenusel %bg_color%%hl_color% "   Code region [%code_name%]" "   Reset workspace" "   Set all CPUs' selections in workspace" "   Randomize CPUs' selections" "   Data management" "   View exported codes" "   Dark mode [%darkmode_name%]" "   Advanced settings" "   Check for updates" "   What is this thing?" "   How do I use it?" " < Back"
 cls
 if %errorlevel% == 1 goto scene_code_region
 if %errorlevel% == 2 del C:\karonboi\KaronWizard\tmp\select_data.bat & goto system_createCharPlaceholders
@@ -235,13 +238,12 @@ if %errorlevel% == 3 goto scene_set_all
 if %errorlevel% == 4 goto scene_randomize
 if %errorlevel% == 5 goto scene_selectionsManagement
 if %errorlevel% == 6 start C:\karonboi\KaronWizard\exported_selections
-if %errorlevel% == 7 goto scene_others_win11Note_ref
-if %errorlevel% == 8 goto scene_others_darkMode
-if %errorlevel% == 9 goto scene_others_advanced
-if %errorlevel% == 10 goto scene_others_checkUpdates
-if %errorlevel% == 11 goto scene_explain
-if %errorlevel% == 12 goto scene_instruction
-if %errorlevel% == 13 goto scene_select_opponent
+if %errorlevel% == 7 goto scene_others_darkMode
+if %errorlevel% == 8 goto scene_others_advanced
+if %errorlevel% == 9 goto scene_others_checkUpdates
+if %errorlevel% == 10 goto scene_explain
+if %errorlevel% == 11 goto scene_instruction
+if %errorlevel% == 12 goto scene_select_opponent
 goto scene_others
 
 :: Temporarily saves selections data from the workspace
@@ -301,7 +303,6 @@ goto endoffile
 :system_createOptionsData
 echo set "code=NTSC-U" >> C:\karonboi\KaronWizard\options.bat
 echo set remem_selectData=1 >> C:\karonboi\KaronWizard\options.bat
-echo set win11_note=1 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=0 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=0 >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCachePersist=0 >> C:\karonboi\KaronWizard\options.bat
@@ -317,7 +318,6 @@ echo.
 del C:\karonboi\KaronWizard\options.bat > nul
 echo set "code=%code%" >> C:\karonboi\KaronWizard\options.bat
 echo set remem_selectData=%remem_selectData% >> C:\karonboi\KaronWizard\options.bat
-echo set win11_note=%win11_note% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_endoffileExit=%adva_endoffileExit% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCache=%adva_datManCache% >> C:\karonboi\KaronWizard\options.bat
 echo set adva_datManCachePersist=%adva_datManCachePersist% >> C:\karonboi\KaronWizard\options.bat
@@ -391,8 +391,9 @@ goto scene_others_checkUpdates
 :scene_others_advanced
 if %adva_endoffileExit% == 0 set "adva_endoffileExit_name=Disabled"
 if %adva_endoffileExit% == 1 set "adva_endoffileExit_name=Enabled"
-if %adva_datManCache% == 0 set "adva_datManCache_name=Disabled"
-if %adva_datManCache% == 1 (
+if %adva_datManCache% == 0 (
+	set "adva_datManCache_name=Disabled"
+) else (
 	if %adva_datManCachePersist% == 1 set "adva_datManCache_name=Enabled, with persistent caching"
 	if %adva_datManCachePersist% == 0 set "adva_datManCache_name=Enabled"
 )
@@ -468,7 +469,7 @@ if %errorlevel% == 2 (
 	if %adva_datManCachePersist% == 1 (
 		set adva_datManCachePersist=0
 		if exist C:\karonboi\KaronWizard\cache.bat del C:\karonboi\KaronWizard\cache.bat
-	) else if %adva_datManCachePersist% == 0 (
+	) else (
 		set adva_datManCachePersist=1
 		if not exist C:\karonboi\KaronWizard\cache.bat (
 			call :system_readFiles
@@ -484,29 +485,6 @@ if %errorlevel% == 3 (
 if %errorlevel% == 4 goto scene_others_advanced
 call :system_saveOptionsData
 goto scene_others_advanced_datManCache
-
-:: Microsoft, can you please just stop inflating Windows with your AI bullshit?
-:: Valve released SteamOS which means you're about to die
-:scene_others_win11Note_ref
-bg locate 0 0
-set "optn1= "
-set "optn2= "
-if %win11_note% == 1 set "optn1=*"
-if %win11_note% == 0 set "optn2=*"
-echo.
-echo    Other options - Windows 11 message
-echo.
-echo ════════════════════════════════════════════════════════════════════════════════════════════
-echo.
-echo    Enable the app to remind Windows 11 users to use this app as administrator at every
-echo    startup?
-echo.
-cmdmenusel %bg_color%%hl_color% " %optn1% Enable" " %optn2% Disable" " < Back"
-if %errorlevel% == 1 set win11_note=1
-if %errorlevel% == 2 set win11_note=0
-if %errorlevel% == 3 goto scene_others
-call :system_saveOptionsData
-goto scene_others_win11Note_ref
 
 :: Average day of an Amazon warehouse manager
 :: I'm not paid enough for this
@@ -526,7 +504,7 @@ if %isDataRead% == 0 set free_slot=0 && call :system_readFiles
 if %adva_datManCache% == 1 set adva_datManCache_intervent=1
 if %slot_lock% == 0 (
 	set "slot_lock_name=Disabled completely"
-) else if %slot_lock% == 1 (
+) else (
 	if %lockToggle% == 1 set "slot_lock_name=In-menu toggle"
 	if %askLockonSave% == 1 set "slot_lock_name=In-menu toggle and ask lock on save"
 )
@@ -801,37 +779,19 @@ goto scene_others
 for /l %%a in (1, 1, 100) do del "C:\karonboi\KaronWizard\saved_selections\%%a.slt" > nul
 goto endoffile
 
-:: Have you seen Mega Greninja's design from Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to
-:: Still couldn't believe we got a DLC for a game that wasn't even out yet
+:: Have you seen Mega Greninja's design from Pokémon Legends Z-A? I do agree the new color schemes look way cooler than the Ash- variant, but the upside-down posture might take a while to get used to. That is, if that pose isn't suffocating him
+:: Still couldn't believe we got a DLC for a game that wasn't even out by then
 
 :: Checks for any invalidity of the character-vehicle size-relative rule
 :: For example, a lightweight character must be paired with small vehicles and vice versa
 :system_checkDataValidity
 bg locate 1 3
-echo Validating data... This could take a while.
+echo Validating data...
 call validator.bat
-if %isChar1Invalid% == 1 goto scene_stop_generateCode
-if %isChar2Invalid% == 1 goto scene_stop_generateCode
-if %isChar3Invalid% == 1 goto scene_stop_generateCode
-if %isChar4Invalid% == 1 goto scene_stop_generateCode
-if %isChar5Invalid% == 1 goto scene_stop_generateCode
-if %isChar6Invalid% == 1 goto scene_stop_generateCode
-if %isChar7Invalid% == 1 goto scene_stop_generateCode
-if %isChar8Invalid% == 1 goto scene_stop_generateCode
-if %isChar9Invalid% == 1 goto scene_stop_generateCode
-if %isChar10Invalid% == 1 goto scene_stop_generateCode
-if %isChar11Invalid% == 1 goto scene_stop_generateCode
-if %isVeh1Invalid% == 1 goto scene_stop_generateCode
-if %isVeh2Invalid% == 1 goto scene_stop_generateCode
-if %isVeh3Invalid% == 1 goto scene_stop_generateCode
-if %isVeh4Invalid% == 1 goto scene_stop_generateCode
-if %isVeh5Invalid% == 1 goto scene_stop_generateCode
-if %isVeh6Invalid% == 1 goto scene_stop_generateCode
-if %isVeh7Invalid% == 1 goto scene_stop_generateCode
-if %isVeh8Invalid% == 1 goto scene_stop_generateCode
-if %isVeh9Invalid% == 1 goto scene_stop_generateCode
-if %isVeh10Invalid% == 1 goto scene_stop_generateCode
-if %isVeh11Invalid% == 1 goto scene_stop_generateCode
+set /a charInvalid=%isChar1Invalid%+%isChar2Invalid%+%isChar3Invalid%+%isChar4Invalid%+%isChar5Invalid%+%isChar6Invalid%+%isChar7Invalid%+%isChar8Invalid%+%isChar9Invalid%+%isChar10Invalid%+%isChar11Invalid%
+set /a vehInvalid=%isVeh1Invalid%+%isVeh2Invalid%+%isVeh3Invalid%+%isVeh4Invalid%+%isVeh5Invalid%+%isVeh6Invalid%+%isVeh7Invalid%+%isVeh8Invalid%+%isVeh9Invalid%+%isVeh10Invalid%+%isVeh11Invalid%
+if %charInvalid% gtr 0 goto scene_stop_generateCod
+if %vehInvalid% gtr 0 goto scene_stop_generateCode
 if "%code%" == "wait_input" goto scene_code_region_waiting
 goto scene_generateCode_done
 
@@ -1093,6 +1053,7 @@ goto scene_select_vehicles
 
 :: I don't want to piss off people that think using they/them pronouns on a Mii with a specific gender is offensive... just in case
 :scene_mii
+set mii_selected=1
 cls
 echo.
 echo    Now CPU %opponent% plays as Mii, select the Mii's gender:
@@ -1102,7 +1063,7 @@ echo.
 cmdmenusel %bg_color%%hl_color% "   Male" "   Female" " < Back a step"
 if %errorlevel% == 1 set "mii_gen=M" && set "mii_gen_name=male" && set "mii_gen_name_2=Male" && set "mii_gen_pronoun=his"
 if %errorlevel% == 2 set "mii_gen=F" && set "mii_gen_name=female" && set "mii_gen_name_2=Female" && set "mii_gen_pronoun=her"
-if %errorlevel% == 3 goto scene_select_character
+if %errorlevel% == 3 set mii_selected=0 && goto scene_select_character
 goto scene_mii_2
 
 :scene_mii_2
@@ -1143,12 +1104,12 @@ if "%mii_gen%" == "M" (
 		if "%mii_size%" == "S" set "char=18"
 		if "%mii_size%" == "M" set "char=1E"
 		if "%mii_size%" == "L" set "char=24"
-		)
+	)
 	if "%mii_outfit%" == "B" (
 		if "%mii_size%" == "S" set "char=1A"
 		if "%mii_size%" == "M" set "char=20"
 		if "%mii_size%" == "L" set "char=26"
-		)
+	)
 	if "%mii_outfit%" == "C" (
 		if "%mii_size%" == "S" set "char=1C"
 		if "%mii_size%" == "M" set "char=22"
@@ -1159,12 +1120,12 @@ if "%mii_gen%" == "M" (
 		if "%mii_size%" == "S" set "char=19"
 		if "%mii_size%" == "M" set "char=1F"
 		if "%mii_size%" == "L" set "char=25"
-		)
+	)
 	if "%mii_outfit%" == "B" (
 		if "%mii_size%" == "S" set "char=1B"
 		if "%mii_size%" == "M" set "char=21"
 		if "%mii_size%" == "L" set "char=27"
-		)
+	)
 	if "%mii_outfit%" == "C" (
 		if "%mii_size%" == "S" set "char=1D"
 		if "%mii_size%" == "M" set "char=23"
@@ -1215,14 +1176,15 @@ echo    Now CPU %opponent% plays as %mii_size_name% %mii_gen_name% Mii and wears
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-if "%mii_size%" == "S" call :scene_select_vehicles_s_mii
-if "%mii_size%" == "M" call :scene_select_vehicles_m_mii
-if "%mii_size%" == "L" call :scene_select_vehicles_l_mii
+if "%mii_size%" == "S" call :scene_select_vehicles_s
+if "%mii_size%" == "M" call :scene_select_vehicles_m
+if "%mii_size%" == "L" call :scene_select_vehicles_l
 goto scene_mii_3
 
 :: The vehicle selection menus are split into three types: Small, Medium, Large
 :: There are three other menus with the same functions, but they are specifically used for the Mii racers. The code blocks containing those menus are marked with the "_mii" suffix
 :: I am currently unable to optimize this section because nesting commands in DOS is a bad idea (as well as stacking, it's basically spaghettifying the code), but I may find out the way, eventually
+:: Update: it looks like I did found a way to clean this up
 :scene_select_vehicles_s
 echo    [Small Vehicles]
 echo.
@@ -1241,30 +1203,12 @@ if %errorlevel% == 11 set "veh%opponent%=1E" && set "veh%opponent%_name=Magikrui
 if %errorlevel% == 12 set "veh%opponent%=21" && set "veh%opponent%_name=Jet Bubble"
 if %errorlevel% == 13 goto scene_select_character
 set char%opponent%=%char%
-set char%opponent%_name=%char_name%
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
-:: *suddenly feels gay*
-:scene_select_vehicles_s_mii
-echo    [Small Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart S" "   Booster Seat" "   Mini Beast" "   Cheep Charger" "   Tiny Titan" "   Blue Falcon" "   Standard Bike S" "   Bullet Bike" "   Bit Bike" "   Quacker" "   Magikruiser" "   Jet Bubble" " < Back a step"
-if %errorlevel% == 1 set "veh%opponent%=00" && set "veh%opponent%_name=Standard Kart S"
-if %errorlevel% == 2 set "veh%opponent%=03" && set "veh%opponent%_name=Booster Seat"
-if %errorlevel% == 3 set "veh%opponent%=06" && set "veh%opponent%_name=Mini Beast"
-if %errorlevel% == 4 set "veh%opponent%=09" && set "veh%opponent%_name=Cheep Charger"
-if %errorlevel% == 5 set "veh%opponent%=0C" && set "veh%opponent%_name=Tiny Titan"
-if %errorlevel% == 6 set "veh%opponent%=0F" && set "veh%opponent%_name=Blue Falcon"
-if %errorlevel% == 7 set "veh%opponent%=12" && set "veh%opponent%_name=Standard Bike S"
-if %errorlevel% == 8 set "veh%opponent%=15" && set "veh%opponent%_name=Bullet Bike"
-if %errorlevel% == 9 set "veh%opponent%=18" && set "veh%opponent%_name=Bit Bike"
-if %errorlevel% == 10 set "veh%opponent%=1B" && set "veh%opponent%_name=Quacker"
-if %errorlevel% == 11 set "veh%opponent%=1E" && set "veh%opponent%_name=Magikruiser"
-if %errorlevel% == 12 set "veh%opponent%=21" && set "veh%opponent%_name=Jet Bubble"
-if %errorlevel% == 13 goto scene_mii_3
-set char%opponent%=%char%
-set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, small size"
+if %mii_selected% == 0 (
+	set char%opponent%_name=%char_name%
+) else (
+	set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, small size"
+	set mii_selected=0
+)
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
 
@@ -1287,29 +1231,11 @@ if %errorlevel% == 11 set "veh%opponent%=1F" && set "veh%opponent%_name=Sneakste
 if %errorlevel% == 12 set "veh%opponent%=22" && set "veh%opponent%_name=Dolphin Dasher"
 if %errorlevel% == 13 goto scene_select_character
 set char%opponent%=%char%
-set char%opponent%_name=%char_name%
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
-:scene_select_vehicles_m_mii
-echo    [Medium Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart M" "   Classic Dragster" "   Wild Wing" "   Super Blooper" "   Daytripper" "   Sprinter" "   Standard Bike M" "   Mach Bike" "   Sugarscoot" "   Zip Zip" "   Sneakster" "   Dolphin Dasher" " < Back a step"
-if %errorlevel% == 1 set "veh%opponent%=01" && set "veh%opponent%_name=Standard Kart M"
-if %errorlevel% == 2 set "veh%opponent%=04" && set "veh%opponent%_name=Classic Dragster"
-if %errorlevel% == 3 set "veh%opponent%=07" && set "veh%opponent%_name=Wild Wing"
-if %errorlevel% == 4 set "veh%opponent%=0A" && set "veh%opponent%_name=Super Blooper"
-if %errorlevel% == 5 set "veh%opponent%=0D" && set "veh%opponent%_name=Daytripper"
-if %errorlevel% == 6 set "veh%opponent%=10" && set "veh%opponent%_name=Sprinter"
-if %errorlevel% == 7 set "veh%opponent%=13" && set "veh%opponent%_name=Standard Bike M"
-if %errorlevel% == 8 set "veh%opponent%=16" && set "veh%opponent%_name=Mach Bike"
-if %errorlevel% == 9 set "veh%opponent%=19" && set "veh%opponent%_name=Sugarscoot"
-if %errorlevel% == 10 set "veh%opponent%=1C" && set "veh%opponent%_name=Zip Zip"
-if %errorlevel% == 11 set "veh%opponent%=1F" && set "veh%opponent%_name=Sneakster"
-if %errorlevel% == 12 set "veh%opponent%=22" && set "veh%opponent%_name=Dolphin Dasher"
-if %errorlevel% == 13 goto scene_mii_3
-set char%opponent%=%char%
-set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, medium size"
+if %mii_selected% == 0 (
+	set char%opponent%_name=%char_name%
+) else (
+	set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, medium size"
+)
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
 
@@ -1332,29 +1258,11 @@ if %errorlevel% == 11 set "veh%opponent%=20" && set "veh%opponent%_name=Spear"
 if %errorlevel% == 12 set "veh%opponent%=23" && set "veh%opponent%_name=Phantom"
 if %errorlevel% == 13 goto scene_select_character
 set char%opponent%=%char%
-set char%opponent%_name=%char_name%
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
-:scene_select_vehicles_l_mii
-echo    [Large Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart L" "   Offroader" "   Flame Flyer" "   Piranha Prowler" "   Jetsetter" "   Honeycoupe" "   Standard Bike L" "   Flame Runner" "   Wario Bike" "   Shooting Star" "   Spear" "   Phantom" " < Back a step"
-if %errorlevel% == 1 set "veh%opponent%=02" && set "veh%opponent%_name=Standard Kart L"
-if %errorlevel% == 2 set "veh%opponent%=05" && set "veh%opponent%_name=Offroader"
-if %errorlevel% == 3 set "veh%opponent%=08" && set "veh%opponent%_name=Flame Flyer"
-if %errorlevel% == 4 set "veh%opponent%=0B" && set "veh%opponent%_name=Piranha Prowler"
-if %errorlevel% == 5 set "veh%opponent%=0E" && set "veh%opponent%_name=Jetsetter"
-if %errorlevel% == 6 set "veh%opponent%=11" && set "veh%opponent%_name=Honeycoupe"
-if %errorlevel% == 7 set "veh%opponent%=14" && set "veh%opponent%_name=Standard Bike L"
-if %errorlevel% == 8 set "veh%opponent%=17" && set "veh%opponent%_name=Flame Runner"
-if %errorlevel% == 9 set "veh%opponent%=1A" && set "veh%opponent%_name=Wario Bike"
-if %errorlevel% == 10 set "veh%opponent%=1D" && set "veh%opponent%_name=Shooting Star"
-if %errorlevel% == 11 set "veh%opponent%=20" && set "veh%opponent%_name=Spear"
-if %errorlevel% == 12 set "veh%opponent%=23" && set "veh%opponent%_name=Phantom"
-if %errorlevel% == 13 goto scene_mii_3
-set char%opponent%=%char%
-set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, large size"
+if %mii_selected% == 0 (
+	set char%opponent%_name=%char_name%
+) else (
+	set "char%opponent%_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, large size"
+)
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
 
@@ -1434,6 +1342,7 @@ if "%char%" == "17" goto scene_select_vehicles_l_all
 goto scene_select_vehicles_all
 
 :scene_mii_all
+set mii_selected=1
 cls
 echo.
 echo    Now all CPU opponents play as Mii, select their gender:
@@ -1443,7 +1352,7 @@ echo.
 cmdmenusel %bg_color%%hl_color% "   Male" "   Female" " < Back a step"
 if %errorlevel% == 1 set "mii_gen=M" && set "mii_gen_name=male" && set "mii_gen_name_2=Male"
 if %errorlevel% == 2 set "mii_gen=F" && set "mii_gen_name=female" && set "mii_gen_name_2=Female"
-if %errorlevel% == 3 goto scene_set_all
+if %errorlevel% == 3 set mii_selected=0 && goto scene_set_all
 goto scene_mii_all_2
 
 :scene_mii_all_2
@@ -1484,9 +1393,9 @@ echo    Now all CPU opponents play as %mii_size_name% %mii_gen_name% Mii and wea
 echo.
 echo ════════════════════════════════════════════════════════════════════════════════════════════
 echo.
-if "%mii_size%" == "S" call :scene_select_vehicles_s_mii_all
-if "%mii_size%" == "M" call :scene_select_vehicles_m_mii_all
-if "%mii_size%" == "L" call :scene_select_vehicles_l_mii_all
+if "%mii_size%" == "S" call :scene_select_vehicles_s_all
+if "%mii_size%" == "M" call :scene_select_vehicles_m_all
+if "%mii_size%" == "L" call :scene_select_vehicles_l_all
 goto scene_mii_all_3
 
 :scene_select_vehicles_s_all
@@ -1510,33 +1419,8 @@ for /l %%a in (1, 1, 11) do (
     set "veh%%a=%veh%"
 	set "veh%%a_name=%veh_name%"
 	set "char%%a=%char%"
-	set "char%%a_name=%char_name%"
-)
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
-:scene_select_vehicles_s_mii_all
-echo    [Small Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart S" "   Booster Seat" "   Mini Beast" "   Cheep Charger" "   Tiny Titan" "   Blue Falcon" "   Standard Bike S" "   Bullet Bike" "   Bit Bike" "   Quacker" "   Magikruiser" "   Jet Bubble" " < Back a step"
-if %errorlevel% == 1 set "veh=00" && set "veh_name=Standard Kart S"
-if %errorlevel% == 2 set "veh=03" && set "veh_name=Booster Seat"
-if %errorlevel% == 3 set "veh=06" && set "veh_name=Mini Beast"
-if %errorlevel% == 4 set "veh=09" && set "veh_name=Cheep Charger"
-if %errorlevel% == 5 set "veh=0C" && set "veh_name=Tiny Titan"
-if %errorlevel% == 6 set "veh=0F" && set "veh_name=Blue Falcon"
-if %errorlevel% == 7 set "veh=12" && set "veh_name=Standard Bike S"
-if %errorlevel% == 8 set "veh=15" && set "veh_name=Bullet Bike"
-if %errorlevel% == 9 set "veh=18" && set "veh_name=Bit Bike"
-if %errorlevel% == 10 set "veh=1B" && set "veh_name=Quacker"
-if %errorlevel% == 11 set "veh=1E" && set "veh_name=Magikruiser"
-if %errorlevel% == 12 set "veh=21" && set "veh_name=Jet Bubble"
-if %errorlevel% == 13 goto scene_mii_all_3
-for /l %%a in (1, 1, 11) do (
-    set "veh%%a=%veh%"
-	set "veh%%a_name=%veh_name%"
-	set "char%%a=%char%"
-	set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, small size"
+	if %mii_selected% == 0 set "char%%a_name=%char_name%"
+	if %mii_selected% == 1 set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, small size"
 )
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
@@ -1562,38 +1446,13 @@ for /l %%a in (1, 1, 11) do (
     set "veh%%a=%veh%"
 	set "veh%%a_name=%veh_name%"
 	set "char%%a=%char%"
-	set "char%%a_name=%char_name%"
+	if %mii_selected% == 0 set "char%%a_name=%char_name%"
+	if %mii_selected% == 1 set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, medium size"
 )
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
 
 :: "Peter, the horse is here."
-:scene_select_vehicles_m_mii_all
-echo    [Medium Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart M" "   Classic Dragster" "   Wild Wing" "   Super Blooper" "   Daytripper" "   Sprinter" "   Standard Bike M" "   Mach Bike" "   Sugarscoot" "   Zip Zip" "   Sneakster" "   Dolphin Dasher" " < Back a step"
-if %errorlevel% == 1 set "veh=01" && set "veh_name=Standard Kart M"
-if %errorlevel% == 2 set "veh=04" && set "veh_name=Classic Dragster"
-if %errorlevel% == 3 set "veh=07" && set "veh_name=Wild Wing"
-if %errorlevel% == 4 set "veh=0A" && set "veh_name=Super Blooper"
-if %errorlevel% == 5 set "veh=0D" && set "veh_name=Daytripper"
-if %errorlevel% == 6 set "veh=10" && set "veh_name=Sprinter"
-if %errorlevel% == 7 set "veh=13" && set "veh_name=Standard Bike M"
-if %errorlevel% == 8 set "veh=16" && set "veh_name=Mach Bike"
-if %errorlevel% == 9 set "veh=19" && set "veh_name=Sugarscoot"
-if %errorlevel% == 10 set "veh=1C" && set "veh_name=Zip Zip"
-if %errorlevel% == 11 set "veh=1F" && set "veh_name=Sneakster"
-if %errorlevel% == 12 set "veh=22" && set "veh_name=Dolphin Dasher"
-if %errorlevel% == 13 goto scene_mii_all_3
-for /l %%a in (1, 1, 11) do (
-    set "veh%%a=%veh%"
-	set "veh%%a_name=%veh_name%"
-	set "char%%a=%char%"
-	set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, medium size"
-)
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
 :scene_select_vehicles_l_all
 echo    [Large Vehicles]
 echo.
@@ -1615,33 +1474,8 @@ for /l %%a in (1, 1, 11) do (
     set "veh%%a=%veh%"
 	set "veh%%a_name=%veh_name%"
 	set "char%%a=%char%"
-	set "char%%a_name=%char_name%"
-)
-call :system_saveSelectDatatoTMP
-goto scene_select_opponent
-
-:scene_select_vehicles_l_mii_all
-echo    [Large Vehicles]
-echo.
-cmdmenusel %bg_color%%hl_color% "   Standard Kart L" "   Offroader" "   Flame Flyer" "   Piranha Prowler" "   Jetsetter" "   Honeycoupe" "   Standard Bike L" "   Flame Runner" "   Wario Bike" "   Shooting Star" "   Spear" "   Phantom" " < Back a step"
-if %errorlevel% == 1 set "veh=02" && set "veh_name=Standard Kart L"
-if %errorlevel% == 2 set "veh=05" && set "veh_name=Offroader"
-if %errorlevel% == 3 set "veh=08" && set "veh_name=Flame Flyer"
-if %errorlevel% == 4 set "veh=0B" && set "veh_name=Piranha Prowler"
-if %errorlevel% == 5 set "veh=0E" && set "veh_name=Jetsetter"
-if %errorlevel% == 6 set "veh=11" && set "veh_name=Honeycoupe"
-if %errorlevel% == 7 set "veh=14" && set "veh_name=Standard Bike L"
-if %errorlevel% == 8 set "veh=17" && set "veh_name=Flame Runner"
-if %errorlevel% == 9 set "veh=1A" && set "veh_name=Wario Bike"
-if %errorlevel% == 10 set "veh=1D" && set "veh_name=Shooting Star"
-if %errorlevel% == 11 set "veh=20" && set "veh_name=Spear"
-if %errorlevel% == 12 set "veh=23" && set "veh_name=Phantom"
-if %errorlevel% == 13 goto scene_mii_all_3
-for /l %%a in (1, 1, 11) do (
-    set "veh%%a=%veh%"
-	set "veh%%a_name=%veh_name%"
-	set "char%%a=%char%"
-	set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, large size"
+	if %mii_selected% == 0 set "char%%a_name=%char_name%"
+	if %mii_selected% == 1 set "char%%a_name=%mii_gen_name_2% Mii, outfit %mii_outfit%, large size"
 )
 call :system_saveSelectDatatoTMP
 goto scene_select_opponent
@@ -1650,5 +1484,5 @@ goto scene_select_opponent
 :: This empty code block lets sub-processes to exit without closing the whole app
 :: This area can be populated with cleanup commands produced by sub-processes if neccesary
 :: But remember, do NOT add any redirect commands (except comments, 'cause why are you seeing this?) into here
-:: And just for the fun of it, here's the 1653rd line of this app's source code
-
+:: And just for the fun of it, here's the 1486th line of this app's source code
+:: [16:08 Monday, January 12, 2026] For the first time in its lifespan, the code's size was reduced
