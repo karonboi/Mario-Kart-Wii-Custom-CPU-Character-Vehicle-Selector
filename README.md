@@ -6,7 +6,7 @@ I wasted too much time building this thing. And don't even think about feeding t
 
 In case the repo's name is not obvious enough, this program allows you to *customize which character and vehicle the CPU players use* in Mario Kart Wii races. However, this code can only be used exclusively in single-player game modes.
 
-If you're looking for a way to let every player in Mario Kart Wii to play as Funky Kong on Flame Runner, *you have found the right place*.
+If you're looking for a way to let every player in Mario Kart Wii to play as Funky Kong in Flame Runner, *you have found the right place*.
 
 ## How and why did I make this?
 
